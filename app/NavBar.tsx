@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
 
-import classnames from 'classnames'
+import classnames from "classnames";
 import { RiTeamLine } from "react-icons/ri";
 
 const NavBar = () => {
@@ -24,11 +24,11 @@ const NavBar = () => {
           {links.map((link) => (
             <li key={link.href}>
               <Link
-              href={link.href}
+                href={link.href}
                 className={classnames({
-                    "text-zinc-300": link.href === currentPath,
-                    "text-zinc-700": link.href !== currentPath,
-                    "hover:text-zinc-200 transition-colors": true
+                  "text-zinc-300": link.href === currentPath,
+                  "text-zinc-700": link.href !== currentPath,
+                  "hover:text-zinc-200 transition-colors": true,
                 })}
               >
                 {link.label}
