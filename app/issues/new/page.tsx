@@ -6,9 +6,10 @@ import "easymde/dist/easymde.min.css";
 import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { zodResolver } from "@hookform/resolvers/zod";
+import {zodResolver} from '@hookform/resolvers/zod';
 import { createIssueSchema } from "@/app/validationSchemas";
 import ErrorMessage from "@/app/components/ErrorMessage";
+import Spinner from "@/app/components/Spinner";
 
 interface IssueForm {
   title: string;
@@ -16,18 +17,17 @@ interface IssueForm {
 }
 
 const NewIssuePage = () => {
-  const {
-    register,
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<IssueForm>({
-    resolver: zodResolver(createIssueSchema),
+  const { register, control, handleSubmit, formState: {errors} } = useForm<IssueForm>({
+    resolver: zodResolver(createIssueSchema)
   });
 
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const router = useRouter();
+
+  const onSubmit = handleSubmit(async (data) => {handleSubmit})
+
   return (
     <>
       <div className="max-w-xl">
@@ -40,9 +40,11 @@ const NewIssuePage = () => {
           className=" space-y-3"
           onSubmit={handleSubmit(async (data) => {
             try {
+              setIsSubmitting(true)
               await axios.post("/api/issues", data);
               router.push("/issues");
             } catch (error) {
+              setIsSubmitting(false)
               setError("An unexpected error has occurred");
             }
           })}
@@ -56,8 +58,8 @@ const NewIssuePage = () => {
               <SimpleMDE placeholder="Description" {...field} />
             )}
           />
-          <ErrorMessage>{errors.description?.message}</ErrorMessage>
-          <Button>Submit New Issue</Button>
+          <ErrorMessage >{errors.description?.message}</ErrorMessage>
+          <Button disabled={isSubmitting}>Submit New Issue {isSubmitting && <Spinner/>}</Button>
         </form>
       </div>
     </>
