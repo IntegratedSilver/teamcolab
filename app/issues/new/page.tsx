@@ -1,12 +1,12 @@
 "use client";
-import { Button, Callout, Text, TextField } from "@radix-ui/themes";
-import React, { useState } from "react";
+import { Button, Callout, TextField } from "@radix-ui/themes";
 import SimpleMDE from "react-simplemde-editor";
 import "easymde/dist/easymde.min.css";
 import { Controller, useForm } from "react-hook-form";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import {zodResolver} from '@hookform/resolvers/zod';
+import { zodResolver } from "@hookform/resolvers/zod";
 import { createIssueSchema } from "@/app/validationSchemas";
 import ErrorMessage from "@/app/components/ErrorMessage";
 import Spinner from "@/app/components/Spinner";
@@ -17,16 +17,30 @@ interface IssueForm {
 }
 
 const NewIssuePage = () => {
-  const { register, control, handleSubmit, formState: {errors} } = useForm<IssueForm>({
-    resolver: zodResolver(createIssueSchema)
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<IssueForm>({
+    resolver: zodResolver(createIssueSchema),
   });
 
   const [error, setError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const router = useRouter();
 
-  const onSubmit = handleSubmit(async (data) => {handleSubmit})
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      setIsSubmitting(true);
+      await axios.post("/api/issues", data);
+      router.push("/issues");
+    } catch (error) {
+      setIsSubmitting(false);
+      setError("An unexpected error has occurred");
+    }
+  });
 
   return (
     <>
@@ -36,30 +50,20 @@ const NewIssuePage = () => {
             <Callout.Text>{error}</Callout.Text>
           </Callout.Root>
         )}
-        <form
-          className=" space-y-3"
-          onSubmit={handleSubmit(async (data) => {
-            try {
-              setIsSubmitting(true)
-              await axios.post("/api/issues", data);
-              router.push("/issues");
-            } catch (error) {
-              setIsSubmitting(false)
-              setError("An unexpected error has occurred");
-            }
-          })}
-        >
-          <TextField.Root size="2" placeholder="Title" {...register("title")} />
+        <form className=" space-y-3" onSubmit={onSubmit}>
+          <TextField.Root size="2" placeholder="title" {...register("title")} />
           <ErrorMessage>{errors.title?.message}</ErrorMessage>
           <Controller
             name="description"
             control={control}
             render={({ field }) => (
-              <SimpleMDE placeholder="Description" {...field} />
+              <SimpleMDE placeholder="description" {...field} />
             )}
           />
-          <ErrorMessage >{errors.description?.message}</ErrorMessage>
-          <Button disabled={isSubmitting}>Submit New Issue {isSubmitting && <Spinner/>}</Button>
+          <ErrorMessage>{errors.description?.message}</ErrorMessage>
+          <Button disabled={isSubmitting}>
+            Submit New Issue{isSubmitting && <Spinner />}
+          </Button>
         </form>
       </div>
     </>
