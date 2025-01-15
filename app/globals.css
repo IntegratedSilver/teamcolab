@@ -26,3 +26,10 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+h1 {
+  color:azure! important;
+}
+  strong{
+  color:azure! important;
+  }
